@@ -10,6 +10,13 @@
 * Go to the folder *microfaune_package*
 * Run the command `pipenv run pip install .`
 
+### Generate a distribution and upload it to Pypi
+
+* Go to the folder *microfaune_ai_package*
+* Run the commands<br/> 
+Generate the distribution `python3 setup.py sdist bdist_wheel`<br/>
+Upload the distribution `twine upload dist/*`
+
 ## Usage
 
 Can be used as any package python:
