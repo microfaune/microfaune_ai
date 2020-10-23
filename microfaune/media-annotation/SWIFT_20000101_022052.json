@@ -1,0 +1,32 @@
+  {
+  "id": 1,
+  "name": "CiteU",
+  "user": 2,
+  "labels": "bird,bird_low",
+  "default_label": 0,
+  "active": true,
+  "tracks": [
+    {
+      "id": 47,
+      "name": "SWIFT_20000101_022052.wav",
+      "file": "/media/SWIFT_20000101_022052.wav",
+      "format": "wav",
+      "project_id": 1,
+      "duration": 60.0,
+      "prediction": "",
+      "annotation_set": [
+        {
+          "id": 1,
+          "track_id": 47,
+          "value": "[{\"id\":\"wavesurfer_4kgitqcktig\",\"start\":4.935061842665718,\"end\":10.509955195406347,\"annotation\":\"\"},{\"id\":\"wavesurfer_afb13jpasm8\",\"start\":17.55982033205593,\"end\":22.95971703246838,\"annotation\":\"\"},{\"id\":\"wavesurfer_jdu8bguik4\",\"start\":26.334652470226157,\"end\":30.184578821446145,\"annotation\":\"\"}]",
+          "user_id": 1,
+          "reviewed": false,
+          "reviewed_by_id": null,
+          "date_time": "2020-10-17T19:12:13.800Z",
+          "username": "admin",
+          "reviewer": null
+        }
+      ]
+    }
+  ]
+}
