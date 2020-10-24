@@ -1,3 +1,6 @@
+from functools import reduce
+import operator
+
 PREDICTION_SAMPLE_WIDTH_IN_MS = 20
 
 class Track:
@@ -32,24 +35,23 @@ class Track:
     # ] --> Fin du Tracks
 
     def map_annotation_set_to_prediction_ndxes(self, track_elmt:dict) -> [(int,int)] :
-        # return [ self._map_annotation_set_elmt_to_prediction_ndxes(annotation_set_elmt.get("value"))
-        #          for annotation_set_elmt in track_elmt.get("annotation_set") ]
-        l = [(int,int)]
-        l.append(self._map_annotation_set_elmt_to_prediction_ndxes(annotation_set_elmt.get("value"))
-                 for annotation_set_elmt in track_elmt.get("annotation_set"))
-        return l
+        prediction_ndxes_of_annotation_set_elmt = []
+        prediction_ndxes_of_annotation_set_elmt +=  map(lambda annotation_set_elmt :
+            self._map_annotation_set_elmt_to_prediction_ndxes(annotation_set_elmt.get("value"), track_elmt.get("duration"), len(track_elmt.get("prediction")) ) ,
+                                                              track_elmt.get("annotation_set"))
+        prediction_ndxes_of_annotation_set_elmt = reduce(operator.concat, prediction_ndxes_of_annotation_set_elmt, [])
+        return prediction_ndxes_of_annotation_set_elmt
 
-    def _map_annotation_set_elmt_to_prediction_ndxes(self, value_list:[dict]) -> [(int,int)]:
-        l = [(int,int)]
-        l.append(self._convert_from_annonation_elmt_time_to_prediction_order(value.get("start"), value.get("end"))
-                 for value in value_list)
-        return l
+    def _map_annotation_set_elmt_to_prediction_ndxes(self, value_list:[dict], track_duration:float, track_predictions_count:int ) -> [(int,int)]:
+        prediction_ndxes_of_value_elmt = []
+        prediction_ndxes_of_value_elmt += map(lambda value : self._convert_from_annonation_elmt_time_to_prediction_order(value, track_duration, track_predictions_count),
+                                              value_list)
+        return prediction_ndxes_of_value_elmt
 
-    # return [ self._convert_from_annonation_elmt_time_to_prediction_order(value.get("start"), value.get("end"))
-        #          for value in value_list ]
-
-    def _convert_from_annonation_elmt_time_to_prediction_order(self, start_time_offset_in_sec:float, end_time_offset_in_sec:float) -> (int,int):
-        (a,b) = ( (int) (start_time_offset_in_sec * 1000 // PREDICTION_SAMPLE_WIDTH_IN_MS) + 1,
-                 (int) (end_time_offset_in_sec * 1000 // PREDICTION_SAMPLE_WIDTH_IN_MS) + 1)
-        print(f'\nstart:{a} - end:{b}')
-        return (a,b)
+    # duration(60 sec) --represente-par--> track.prediction.length (2814)
+    # start            ------------------>  ?
+    def _convert_from_annonation_elmt_time_to_prediction_order(self, value:dict, track_duration:float, track_predictions_count:int ) -> (int,int):
+        # return ( (int) (value.get("start") * 1000 // PREDICTION_SAMPLE_WIDTH_IN_MS) + 1,
+        #          (int) (value.get("end") * 1000 // PREDICTION_SAMPLE_WIDTH_IN_MS) + 1 )
+        return (  int(value.get("start") * track_predictions_count // track_duration) + 1,
+                  int(value.get("end") * track_predictions_count // track_duration) + 1 )
