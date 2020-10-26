@@ -42,7 +42,6 @@ class Track:
 
     def map_annotation_set_to_prediction_ndxes(self, track_elmt:dict) -> [(int,int)] :
         '''
-
         :param track_elmt: An element of 'tracks'
         :return: An array of (start,end) excerpt corresponding to the indexes in Prediction structure of Tack[]
         '''
@@ -86,37 +85,44 @@ class Track:
 
     def compute_track_elmt_metrics(self, positive_tuples_ndexes : [(int, int)], predictions:[]) -> Counter :
         positive_tuples_ndexes.sort(key= lambda tuple: tuple[0])
-        tp = tn = fp = fn = 0
-        counter_tpfn = Counter()
+        # counter_tpfn = Counter()
         # 1 - Compute TP and FN
-        tp_and_fn = [] # List of Counter - TP = tp_and_fn.get(1.0)  / FN = tp_and_fn.get(0.0)
-        tp_and_fn = list(map(lambda positive_tuple_ndexes: self._compute_metrics_according_to_ground_truth(positive_tuple_ndexes, predictions),
-                         positive_tuples_ndexes))
-        # counter_tpfp = Counter(elmt for elmt in tp_and_fn)
-        # counter_tpfp = reduce(self.add_to_counter(), tp_and_fn , Counter())
-        for elmt in tp_and_fn :
-            counter_tpfn += Counter(elmt)
-        print(f'tp_and_fn:{tp_and_fn}\ncounter_tpfn:{counter_tpfn}')
-        # print(counter_tpfn)
+        # tp_and_fn = [] # List of Counter - TP = tp_and_fn.get(1.0)  / FN = tp_and_fn.get(0.0)
+        # tp_and_fn = list(map(lambda positive_tuple_ndexes: self._compute_metrics_according_to_ground_truth(positive_tuple_ndexes, predictions),
+        #                  positive_tuples_ndexes))
+        # for elmt in tp_and_fn :
+        #     counter_tpfn += Counter(elmt)
+        # print(f'tp_and_fn:{tp_and_fn}\ncounter_tpfn:{counter_tpfn}')
+        counter_tpfn = self._do_compute_track_elmt_metrics(positive_tuples_ndexes , predictions, 'tp_and_fn')
+
         # 2 - Compute 'negative_tuples_ndexes' used to compute TN and FP
         negative_tuples_ndexes = self._compute_negative_tuples_ndexes(positive_tuples_ndexes, predictions)
 
         # 3 - Compute FP and TN
-        counter_fptn = Counter()
-        fp_and_tn = [] # FP = tp_and_fn.get(1.0)  / TN = tp_and_fn.get(0.0)
-        fp_and_tn = list(map(lambda negative_tuple_ndexes: self._compute_metrics_according_to_ground_truth(negative_tuple_ndexes, predictions),
-                         negative_tuples_ndexes))
-        for elmt in fp_and_tn :
-            counter_fptn += Counter(elmt)
-        print(f'fp_and_tn:{fp_and_tn}\ncounter_fptn:{counter_fptn}')
-        # print(counter_fptn)
-        # print(type(fp_and_tn))
-        # counter_tp_and_fn = Counter(tp_and_fn)
-        # counter_fp_and_tn = Counter(fp_and_tn)
+        # counter_fptn = Counter()
+        # fp_and_tn = [] # FP = tp_and_fn.get(1.0)  / TN = tp_and_fn.get(0.0)
+        # fp_and_tn = list(map(lambda negative_tuple_ndexes: self._compute_metrics_according_to_ground_truth(negative_tuple_ndexes, predictions),
+        #                  negative_tuples_ndexes))
+        # for elmt in fp_and_tn :
+        #     counter_fptn += Counter(elmt)
+        # print(f'fp_and_tn:{fp_and_tn}\ncounter_fptn:{counter_fptn}')
+        counter_fptn = self._do_compute_track_elmt_metrics(negative_tuples_ndexes , predictions, 'fp_and_tn')
+
         return Counter({'TP': counter_tpfn.get(1.0), 'FN': counter_tpfn.get(0.0),
                         'FP': counter_fptn.get(1.0), 'TN': counter_fptn.get(0.0) })
-        # return Counter({'TP': np.count_nonzero(tp_and_fn), 'FN': len(tp_and_fn) - np.count_nonzero(tp_and_fn),
-        #                 'FP': np.count_nonzero(fp_and_tn), 'TN': len(fp_and_tn) - np.count_nonzero(fp_and_tn)} )
+
+    def _do_compute_track_elmt_metrics(self, positive_or_negative_tuples_ndexes : [(int, int)], predictions:[], n_p_desc : str) -> Counter :
+        # positive_or_negative_tuples_ndexes.sort(key= lambda tuple: tuple[0])
+        counter_positive_negative = Counter()
+        # 1 - Compute TP and FN
+        p_and_n = [] # List of Counter - TP = tp_and_fn.get(1.0)  / FN = tp_and_fn.get(0.0)
+        p_and_n = list(map(lambda positive_or_negative_tuple_ndexes: self._compute_metrics_according_to_ground_truth(positive_or_negative_tuple_ndexes, predictions),
+                             positive_or_negative_tuples_ndexes))
+        for elmt in p_and_n :
+            counter_positive_negative += Counter(elmt)
+        print(f'{n_p_desc} : {p_and_n}\ncounter_{n_p_desc} : {counter_positive_negative}')
+        return counter_positive_negative
+
 
     def _compute_metrics_according_to_ground_truth(self, tuple_ndexes:(int, int), predictions:[]) -> Counter : #() :
         '''
