@@ -1,4 +1,5 @@
 import os
+from collections import Counter
 
 from detection import RNNDetector
 from domain.track import Track
@@ -13,8 +14,15 @@ class RNNDetectorValidator:
     def __init__(self, detector:RNNDetector):
         self.detector = detector
 
-    def load_annotation_file(self, json_file_path :str) -> dict :
+    def load_json_annotation_file(self, json_file_path :str) -> dict :
         return file_utils.read_json_file(json_file_path)
+
+    def compute_metrics_of_prediction_against_annotation(self, media_file_annotation:dict) -> Counter:
+        track = Track()
+        metrics_counter = []
+        metrics_counter += map(lambda track_elmt : track.compute_metrics_of_prediction_against_annotation(track_elmt) ,
+                               media_file_annotation.get("tracks"))
+        return metrics_counter
 
     def map_annotation_elmt_to_prediction_ndxes(self, media_file_annotation:dict) -> [(int,int)] :
         ''' Get the related prediction sequence(int,int) list of the media file positive annotation
@@ -39,8 +47,10 @@ class RNNDetectorValidator:
 if __name__ == '__main__' :
     detector = RNNDetector()
     validator = RNNDetectorValidator(detector)
-    all_annotations = validator.load_annotation_file( os.path.abspath(os.path.join(os.path.dirname(__file__), "media-annotation/SWIFT_20000101_022052.json")) )
-    list_of_tuples = validator.map_annotation_elmt_to_prediction_ndxes(all_annotations)
-    validator.compute_prediction_metrics(list_of_tuples)
+    json_annotation_file = validator.load_json_annotation_file(os.path.abspath(os.path.join(os.path.dirname(__file__), "media-annotation/SWIFT_20000101_022052.json")))
+    # list_of_tuples = validator.map_annotation_elmt_to_prediction_ndxes(json_annotation_file)
+    # validator.compute_prediction_metrics(list_of_tuples)
+    counters = validator.compute_metrics_of_prediction_against_annotation(json_annotation_file)
+
     # global_score, local_score = detector.predict_on_wav(os.path.abspath(os.path.join(os.path.dirname(__file__), "media/SWIFT_20190723_050006.wav"))) # NB: Check that loaded wav file actually exists on your disk
     # print(f"Golbal score: {global_score}  -  Localscore: {local_score}")
