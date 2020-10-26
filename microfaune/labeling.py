@@ -23,7 +23,7 @@ from microfaune import audio, plot
 #     with open(json_file_path) as json_data:
 #         data_dict = json.load(json_data)
 #     return data_dict
-from utils import file_utils
+from utils import misc_utils
 
 
 def number_labels(json_file_path):
@@ -39,7 +39,7 @@ def number_labels(json_file_path):
             nb_labels : int
                 Number of labels in json file
         """
-    data_dict = file_utils.read_json_file(json_file_path)
+    data_dict = misc_utils.read_json_file(json_file_path)
     nb_labels = len(data_dict)
     return nb_labels
 
@@ -63,7 +63,7 @@ def prop_labeled(json_file_path, audio_file_path):
     fs, data = audio.load_audio(audio_file_path)
     total_duration = len(data) / fs
 
-    data_dict = file_utils.read_json_file(json_file_path)
+    data_dict = misc_utils.read_json_file(json_file_path)
 
     bird_song_duration = 0
 
@@ -91,7 +91,7 @@ def charac_function_audio(json_file_path, audio_file_path):
     fs, data = audio.load_audio(audio_file_path)
     charac_func = np.zeros((len(data), 1))
 
-    data_dict = file_utils.read_json_file(json_file_path)
+    data_dict = misc_utils.read_json_file(json_file_path)
 
     for label in data_dict:
         indx_start = int(label['start'] * fs)
@@ -249,7 +249,7 @@ def extract_labels(json_path, start_time, duration):
             labels: list
                 List of labelson the audio extract, each label is a dictionary with keys 'id', 'start', 'end' and 'annotation'
         """
-    data_dict = file_utils.read_json_file(json_path)
+    data_dict = misc_utils.read_json_file(json_path)
     labels = []
 
     for label in data_dict:

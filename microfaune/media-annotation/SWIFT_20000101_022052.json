@@ -40,7 +40,7 @@
         {
           "id": 1,
           "track_id": 48,
-          "value": [{"id":"wavesurfer_4kgitqcktig","start":4.935061842665718,"end":10.509955195406347,"annotation":""},{"id":"wavesurfer_afb13jpasm8","start":17.55982033205593,"end":22.95971703246838,"annotation":""},{"id":"wavesurfer_jdu8bguik4","start":26.334652470226157,"end":30.184578821446145,"annotation":""}],
+          "value": [{"id":"wavesurfer_4kgitqcktig","start":14.935061842665718,"end":20.509955195406347,"annotation":""},{"id":"wavesurfer_afb13jpasm8","start":27.55982033205593,"end":32.95971703246838,"annotation":""},{"id":"wavesurfer_jdu8bguik4","start":36.334652470226157,"end":40.184578821446145,"annotation":""}],
           "user_id": 1,
           "reviewed": false,
           "reviewed_by_id": null,

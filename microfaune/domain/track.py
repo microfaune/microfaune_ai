@@ -1,15 +1,12 @@
 from functools import reduce
 from collections import Counter
+from utils import misc_utils as util
 import operator
 import numpy as np
 
 # PREDICTION_SAMPLE_WIDTH_IN_MS = 20
 
 class Track:
-
-    def compute_metrics_of_prediction_against_annotation(self, track_elmt:dict) -> Counter :
-        positive_tuples_ndexes = self.map_annotation_set_to_prediction_ndxes(track_elmt)
-        return self.compute_track_elmt_metrics(positive_tuples_ndexes, track_elmt.get("prediction"))
 
     # "tracks": [
     #     {
@@ -40,6 +37,10 @@ class Track:
     #     }, --> Fin du TrackElmt
     # ] --> Fin du Tracks
 
+
+    ############################
+    # Compute positive indexes #
+    ############################
     def map_annotation_set_to_prediction_ndxes(self, track_elmt:dict) -> [(int,int)] :
         '''
         :param track_elmt: An element of 'tracks'
@@ -67,7 +68,7 @@ class Track:
 
     def _convert_from_annonation_elmt_time_to_prediction_order(self, value:dict, track_duration:float, track_predictions_count:int ) -> (int,int):
         '''
-        Formula of a tuple (start,end) excerpt corresponding to the indexes in Prediction structure of a particular track.value
+                Formula of a tuple (start,end) excerpt corresponding to the indexes in Prediction structure of a particular track.value
                 track_duration(60 sec) ---represente-par--> track.prediction.length (2814)
                 start                  ------------------->  ?
         :param value: track.value
@@ -75,52 +76,42 @@ class Track:
         :param track_predictions_count: tracks.prediction.length
         :return: An tuple (start,end) excerpt corresponding to the indexes in Prediction structure of a particular track.value
         '''
-        # return ( (int) (value.get("start") * 1000 // PREDICTION_SAMPLE_WIDTH_IN_MS) + 1,
-        #          (int) (value.get("end") * 1000 // PREDICTION_SAMPLE_WIDTH_IN_MS) + 1 )
         return (  int(value.get("start") * track_predictions_count // track_duration) ,
                   int(value.get("end") * track_predictions_count // track_duration)  )
 
-    def add_to_counter(counter, el):
-        counter += el  # can't actually do this in a lambda...
+
+    ####################
+    # Compute Metrics  #
+    ####################
+    def compute_metrics_of_prediction_against_annotation(self, track_elmt:dict) -> Counter :
+        print(f'**Track** id:{track_elmt.get("id")} / name:{track_elmt.get("name")} / file:{track_elmt.get("file")} / duration:{track_elmt.get("duration")}')
+        positive_tuples_ndexes = self.map_annotation_set_to_prediction_ndxes(track_elmt)
+        return self.compute_track_elmt_metrics(positive_tuples_ndexes, track_elmt.get("prediction"))
 
     def compute_track_elmt_metrics(self, positive_tuples_ndexes : [(int, int)], predictions:[]) -> Counter :
+        '''
+        :param positive_tuples_ndexes: list of positive annotated tuple indexes
+        :param predictions: list of predictions made by the model
+        :return: Counter representing the confusion matrix metrics TP / TN / FP / FN
+        '''
         positive_tuples_ndexes.sort(key= lambda tuple: tuple[0])
-        # counter_tpfn = Counter()
         # 1 - Compute TP and FN
-        # tp_and_fn = [] # List of Counter - TP = tp_and_fn.get(1.0)  / FN = tp_and_fn.get(0.0)
-        # tp_and_fn = list(map(lambda positive_tuple_ndexes: self._compute_metrics_according_to_ground_truth(positive_tuple_ndexes, predictions),
-        #                  positive_tuples_ndexes))
-        # for elmt in tp_and_fn :
-        #     counter_tpfn += Counter(elmt)
-        # print(f'tp_and_fn:{tp_and_fn}\ncounter_tpfn:{counter_tpfn}')
         counter_tpfn = self._do_compute_track_elmt_metrics(positive_tuples_ndexes , predictions, 'tp_and_fn')
-
-        # 2 - Compute 'negative_tuples_ndexes' used to compute TN and FP
+        # 2 - Compute 'negative_tuples_ndexes' used to compute TN and FFP
         negative_tuples_ndexes = self._compute_negative_tuples_ndexes(positive_tuples_ndexes, predictions)
-
         # 3 - Compute FP and TN
-        # counter_fptn = Counter()
-        # fp_and_tn = [] # FP = tp_and_fn.get(1.0)  / TN = tp_and_fn.get(0.0)
-        # fp_and_tn = list(map(lambda negative_tuple_ndexes: self._compute_metrics_according_to_ground_truth(negative_tuple_ndexes, predictions),
-        #                  negative_tuples_ndexes))
-        # for elmt in fp_and_tn :
-        #     counter_fptn += Counter(elmt)
-        # print(f'fp_and_tn:{fp_and_tn}\ncounter_fptn:{counter_fptn}')
         counter_fptn = self._do_compute_track_elmt_metrics(negative_tuples_ndexes , predictions, 'fp_and_tn')
-
-        return Counter({'TP': counter_tpfn.get(1.0), 'FN': counter_tpfn.get(0.0),
-                        'FP': counter_fptn.get(1.0), 'TN': counter_fptn.get(0.0) })
+        # 4 - Return the Confusion Matrix element
+        metrics =  Counter({'TP': util.ifNone(counter_tpfn.get(1.0), 0.0), 'FN': util.ifNone(counter_tpfn.get(0.0), 0.0),
+                            'FP': util.ifNone(counter_fptn.get(1.0), 0.0), 'TN': util.ifNone(counter_fptn.get(0.0), 0.0) })
+        print(f'\t{metrics}')
+        return metrics
 
     def _do_compute_track_elmt_metrics(self, positive_or_negative_tuples_ndexes : [(int, int)], predictions:[], n_p_desc : str) -> Counter :
-        # positive_or_negative_tuples_ndexes.sort(key= lambda tuple: tuple[0])
-        counter_positive_negative = Counter()
-        # 1 - Compute TP and FN
-        p_and_n = [] # List of Counter - TP = tp_and_fn.get(1.0)  / FN = tp_and_fn.get(0.0)
         p_and_n = list(map(lambda positive_or_negative_tuple_ndexes: self._compute_metrics_according_to_ground_truth(positive_or_negative_tuple_ndexes, predictions),
                              positive_or_negative_tuples_ndexes))
-        for elmt in p_and_n :
-            counter_positive_negative += Counter(elmt)
-        print(f'{n_p_desc} : {p_and_n}\ncounter_{n_p_desc} : {counter_positive_negative}')
+        counter_positive_negative = util.convert_counter_collection_to_counter(p_and_n)
+        # print(f'{n_p_desc} : {p_and_n}\ncounter_{n_p_desc} : {counter_positive_negative}\n')
         return counter_positive_negative
 
 

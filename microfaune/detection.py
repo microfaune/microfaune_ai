@@ -146,8 +146,8 @@ class RNNDetector:
         """Release GPU memory."""
         self._model = None
 
-if __name__ == '__main__' :
-    detector = RNNDetector()
-    global_score, local_score = detector.predict_on_wav(os.path.abspath(os.path.join(os.path.dirname(__file__), "media/SWIFT_20190723_050006.wav"))) # NB: Check that loaded wav file actually exists on your disk
-    print(f"Golbal score: {global_score}  -  Localscore: {local_score}")
+# if __name__ == '__main__' :
+#     detector = RNNDetector()
+#     global_score, local_score = detector.predict_on_wav(os.path.abspath(os.path.join(os.path.dirname(__file__), "media/SWIFT_20190723_050006.wav"))) # NB: Check that loaded wav file actually exists on your disk
+#     print(f"Golbal score: {global_score}  -  Localscore: {local_score}")
 
