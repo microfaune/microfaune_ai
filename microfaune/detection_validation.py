@@ -16,10 +16,8 @@ class RNNDetectorValidator:
         metrics_dir = Counter()
         entries = Path(directory_path)
         for entry in entries.iterdir():
-            if entry.is_dir() :
-                metrics_dir += self.computeMetricsAgainstAnnotatedDirectory(os.path.join(directory_path, entry.name))
-            else :
-                metrics_dir += self.computeMetricsAgainstAnnotatedFile(f'{directory_path}/{entry.name}')
+            metrics_dir += self.computeMetricsAgainstAnnotatedDirectory(os.path.join(directory_path, entry.name)) \
+                           if entry.is_dir() else self.computeMetricsAgainstAnnotatedFile(f'{directory_path}/{entry.name}')
         return metrics_dir
 
     def computeMetricsAgainstAnnotatedFile(self, json_file_path :str) -> Counter:
