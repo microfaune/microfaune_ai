@@ -43,4 +43,8 @@ class RNNDetectorValidator:
 #     validator = RNNDetectorValidator(detector)
 #     # metrics = validator.computeMetricsAgainstAnnotatedFile( os.path.abspath(os.path.join(os.path.dirname(__file__), "media-annotation/SWIFT_20000101_022052.json")) )
 #     metrics = validator.computeMetricsAgainstAnnotatedDirectory( os.path.abspath(os.path.join(os.path.dirname(__file__), "media-annotation")) )
+#     print(f'Accuracy  : {misc_utils.getAccuracy(metrics)}')
+#     print(f'Precision : {misc_utils.getPrecision(metrics)}')
+#     print(f'Recall    : {misc_utils.getRecall(metrics)}')
+#     print(f'F1        : {misc_utils.getF1(metrics)}')
 #     print(f'Total METRICS : {metrics}')
